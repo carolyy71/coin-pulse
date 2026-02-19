@@ -126,7 +126,7 @@ export const CandleStickChart = ({
         <div className="flex flex-1">
           {children}
           <div className="button-group">
-            <span className="text-sm mx-2 font-medum text-purple-100/50">
+            <span className="text-sm mx-2 font-medium text-purple-100/50">
               Period:
             </span>
             {PERIOD_BUTTONS.map((item) => {
