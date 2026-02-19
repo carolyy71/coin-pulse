@@ -38,7 +38,6 @@ export const CandleStickChart = ({
   height = 360,
   initialPeriod = 'daily',
 }: Props) => {
-  const [loading, setLoading] = useState(false);
   const [period, setPeriod] = useState<string>(initialPeriod);
   const [ohlcData, setOhlcData] = useState<OHLCData[]>(data ?? []);
   const [isPending, startTransition] = useTransition();
@@ -78,7 +77,17 @@ export const CandleStickChart = ({
       width: container.clientWidth,
     });
     const series = chart.addSeries(CandlestickSeries, getCandlestickConfig());
-    series.setData(convertOHLCData(ohlcData));
+    const convertedToSeconds = ohlcData.map(
+      (item) =>
+        [
+          Math.floor(item[0] / 1000),
+          item[1],
+          item[2],
+          item[3],
+          item[4],
+        ] as OHLCData
+    );
+    series.setData(convertOHLCData(convertedToSeconds));
     chart.timeScale().fitContent();
     const observer = new ResizeObserver((entries) => {
       if (!entries.length) return;
@@ -132,7 +141,7 @@ export const CandleStickChart = ({
                   onClick={() => {
                     handlePeriodChange(item.value);
                   }}
-                  disabled={loading}
+                  disabled={isPending}
                 >
                   {item.label}
                 </button>
