@@ -117,7 +117,7 @@ export const CandleStickChart = ({
     );
     const converted = convertOHLCData(convertedToSeconds);
     candleSeriesRef.current.setData(converted);
-    chartRef.current?.timeScale().fitContent()
+    chartRef.current?.timeScale().fitContent();
   }, [ohlcData]);
 
   return (
