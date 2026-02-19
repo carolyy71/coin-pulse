@@ -8,8 +8,18 @@ import {
   useState,
   useTransition,
 } from 'react';
-import { getCandlestickConfig, getChartConfig, PERIOD_BUTTONS, PERIOD_CONFIG } from './Constant';
-import { CandlestickSeries, createChart, IChartApi, ISeriesApi } from 'lightweight-charts';
+import {
+  getCandlestickConfig,
+  getChartConfig,
+  PERIOD_BUTTONS,
+  PERIOD_CONFIG,
+} from './Constant';
+import {
+  CandlestickSeries,
+  createChart,
+  IChartApi,
+  ISeriesApi,
+} from 'lightweight-charts';
 import { fetcher } from '@/lib/coingecko.sctions';
 import { convertOHLCData } from '@/lib/utils';
 
@@ -42,7 +52,7 @@ export const CandleStickChart = ({
       const newData = await fetcher<OHLCData[]>(`/coins/${coinId}/ohlc`, {
         vs_currency: 'usd',
         days: config.days,
-        interval: config.interval,
+        // interval: config.interval, only pro
         precision: 'full',
       });
       setOhlcData(newData ?? []);
@@ -69,7 +79,37 @@ export const CandleStickChart = ({
     });
     const series = chart.addSeries(CandlestickSeries, getCandlestickConfig());
     series.setData(convertOHLCData(ohlcData));
-  }, [height]);
+    chart.timeScale().fitContent();
+    const observer = new ResizeObserver((entries) => {
+      if (!entries.length) return;
+      chart.applyOptions({ width: entries[0].contentRect.width });
+    });
+    observer.observe(container);
+    return () => {
+      observer.disconnect();
+      chart.remove();
+      chartRef.current = null;
+      candleSeriesRef.current = null;
+      //distroy chart instance to prevent memeory leak
+    };
+  }, [height, ohlcData, period]);
+
+  useEffect(() => {
+    if (!candleSeriesRef.current) return;
+    const convertedToSeconds = ohlcData.map(
+      (item) =>
+        [
+          Math.floor(item[0] / 1000),
+          item[1],
+          item[2],
+          item[3],
+          item[4],
+        ] as OHLCData
+    );
+    const converted = convertOHLCData(convertedToSeconds);
+    candleSeriesRef.current.setData(converted);
+    chartRef.current?.timeScale().fitContent()
+  }, [ohlcData]);
 
   return (
     <div id="candlestick-chart">
