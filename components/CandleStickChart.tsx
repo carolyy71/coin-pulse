@@ -99,7 +99,7 @@ export const CandleStickChart = ({
       chart.remove();
       chartRef.current = null;
       candleSeriesRef.current = null;
-      //distroy chart instance to prevent memeory leak
+      // destroy chart instance to prevent memory leak
     };
   }, [height, ohlcData, period]);
 
